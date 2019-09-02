@@ -8,13 +8,16 @@ class Master(base.Root):
     def __init__(self):
         base.Root.__init__(self)
         self.start_time = _time.time()
-        self.muted_uuids = list()
+        self.muted_uuids = []
         self.should_block_blueheads = False
 
     async def on_self_context(self, uuid, name, is_guest, is_online, is_deleted):
         print("[debug]", "on_self_context")
 
     async def on_text_add(self, uuid, name, body, time, is_mine):
+        print("[debug]", "on_text_add")
+        print(uuid, name, body, time, is_mine)
+
         if is_mine:
             return
         if uuid in self.muted_uuids:
@@ -103,8 +106,6 @@ class Master(base.Root):
         await self.add_pv(uuid, "I can't recall if I banned this user before.")
 
     async def mute(self, uuid, body):
-        print('[debug]', 'before execution mute')
-        print(self.muted_uuids)
         args = utils.strip(body, "mute")
 
         if len(args) <= 0:
@@ -116,26 +117,18 @@ class Master(base.Root):
         if utils.isuuid(args):
             utils.append_to(self.muted_uuids, args)
             await self.add_pv(uuid, "Taped their mouth, till they suffocate.")
-            print('[debug]', 'after execution of mute')
-            print(self.muted_uuids)
             return
 
         users = self.storage["chatroomContext"]["data"]["users"].values()
         user = utils.best_match(users, "username", args)
         if user is not None:
             utils.append_to(self.muted_uuids, user["userUuid"])
-            await self.add_pv(uuid, "I found a match and taped this prick: " + user["username"])
-            print('[debug]', 'after execution of mute')
-            print(self.muted_uuids)
+            await self.add_pv(uuid, "I found a match and taped this prick's mouth: " + user["username"])
             return
 
         await self.add_pv(uuid, "I don't think they are around anymore.")
-        print('[debug]', 'after execution of mute')
-        print(self.muted_uuids)
 
     async def unmute(self, uuid, body):
-        print('[debug]', 'before execution of unmute')
-        print(self.muted_uuids)
         args = utils.strip(body, "unmute")
 
         if len(args) <= 0:
@@ -147,22 +140,16 @@ class Master(base.Root):
         if utils.isuuid(args):
             self.muted_uuids.remove(args)
             await self.add_pv(uuid, "Not sure if it was the correct decision.")
-            print('[debug]', 'after execution of unmute')
-            print(self.muted_uuids)
             return
 
         users = await self.batch_context_users(self.muted_uuids)
         user = utils.best_match(users, "username", args)
         if user is not None:
             self.muted_uuids.remove(user["userUuid"])
-            await self.add_pv(uuid, "I found a match and untaped this once-a-scum prick: " + user["username"])
-            print('[debug]', 'after execution of unmute')
-            print(self.muted_uuids)
+            await self.add_pv(uuid, "I found a match and untaped this prick's mouth: " + user["username"])
             return
 
         await self.add_pv(uuid, "I don't recall taping their mouth before.")
-        print('[debug]', 'after execution of unmute')
-        print(self.muted_uuids)
 
     async def stalk(self, uuid, body):
         args = utils.strip(body, "stalk")
