@@ -8,7 +8,7 @@ class Master(base.Root):
     def __init__(self):
         base.Root.__init__(self)
         self.start_time = _time.time()
-        self.muted_users = list()
+        self.muted_users = []
         self.should_block_blueheads = False
 
     async def on_self_context(self, uuid, name, is_guest, is_online, is_deleted):
@@ -327,6 +327,7 @@ class Master(base.Root):
             utils.append_to(self.muted_users, user)
 
     def remove_mute(self, uuid):
+        print('[debug]', 'should remove', uuid)
         utils.remove_from(self.muted_users, "userUuid", uuid)
 
 #    async def greet(self):
