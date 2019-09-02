@@ -147,7 +147,7 @@ class Master(base.Root):
 
         user = utils.best_match(self.muted_users, "username", args)
         if user is not None:
-            await self.remove_ban(user["userUuid"])
+            await self.remove_mute(user["userUuid"])
             await self.add_pv(uuid, "I found a match and untaped this once-a-scum prick: " + user["username"])
             print('[debug]', 'after execution of unmute')
             print(self.muted_users)
