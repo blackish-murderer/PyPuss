@@ -110,6 +110,8 @@ class Master(base.Root):
         if utils.isuuid(args):
             await self.add_mute(args)
             await self.add_pv(uuid, "Taped their mouth, till they suffocate.")
+            print('[debug]', 'after execution of mute')
+            print(self.muted_users)
             return
 
         users = self.storage["chatroomContext"]["data"]["users"].values()
@@ -117,6 +119,8 @@ class Master(base.Root):
         if user is not None:
             await self.add_mute(user["userUuid"])
             await self.add_pv(uuid, "I found a match and taped this prick: " + user["username"])
+            print('[debug]', 'after execution of mute')
+            print(self.muted_users)
             return
 
         await self.add_pv(uuid, "I don't think they are around anymore.")
@@ -137,12 +141,16 @@ class Master(base.Root):
         if utils.isuuid(args):
             await self.remove_mute(args)
             await self.add_pv(uuid, "Not sure if it was the correct decision.")
+            print('[debug]', 'after execution of unmute')
+            print(self.muted_users)
             return
 
         user = utils.best_match(self.muted_users, "username", args)
         if user is not None:
             await self.remove_ban(user["userUuid"])
             await self.add_pv(uuid, "I found a match and untaped this once-a-scum prick: " + user["username"])
+            print('[debug]', 'after execution of unmute')
+            print(self.muted_users)
             return
 
         await self.add_pv(uuid, "I don't recall taping their mouth before.")
