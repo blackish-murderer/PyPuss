@@ -112,7 +112,7 @@ class Master(base.Root):
             await self.add_pv(uuid, "Taped their mouth, till they suffocate.")
             return
 
-        users = await self.batch_context_users(self.storage["chatroomBannedUuids"])
+        users = self.storage["chatroomContext"]["data"]["users"].values()
         user = utils.best_match(users, "username", args)
         if user is not None:
             await self.add_mute(user["userUuid"])
