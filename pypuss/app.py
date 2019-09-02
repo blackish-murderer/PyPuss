@@ -8,7 +8,7 @@ class Master(base.Root):
     def __init__(self):
         base.Root.__init__(self)
         self.start_time = _time.time()
-        self.muted_uuids = []
+        self.muted_uuids = list()
         self.should_block_blueheads = False
 
     async def on_self_context(self, uuid, name, is_guest, is_online, is_deleted):
