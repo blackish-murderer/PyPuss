@@ -48,6 +48,12 @@ def isresponse(message):
     has_data = "data" in message
     return is_service and has_data
 
+def last_of(source):
+    last_index = len(source) - 1
+    if last_index < 0:
+        return None
+    return source[last_index]
+
 def append_to(source, value):
     try:
         source.index(value)

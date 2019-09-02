@@ -3,27 +3,75 @@ import time as _time
 
 import pypuss.base as base
 import pypuss.utils as utils
+import pypuss.constants as constants
 
 class Master(base.Root):
     def __init__(self):
         base.Root.__init__(self)
         self.start_time = _time.time()
         self.muted_uuids = []
+        self.stalked_users = {}
         self.should_block_blueheads = False
+
+    def add_stalked(self, uuid, name, is_guest, is_online, is_deleted):
+        self.stalked_users[uuid] = { "userUuid": uuid, "username": name, "isOnline": is_online, "logs": [] }
+
+    def remove_stalked(self, uuid):
+        self.stalked_users.pop(uuid)
+
+    def update_stalked(self, uuid, name, is_guest, is_online, is_deleted):
+        self.stalked_users[uuid]["isOnline"] = is_online
+        self.stalked_users[uuid]["logs"].append({ "isOnline": is_online, "timestamp": _time.time() })
+
+    def report_stalked(self, uuid):
+        stalked = self.stalked_users.get(uuid)
+        if stalked is None:
+            return "I don't think I was asked to stalk them."
+        last_log = utils.last_of(stalked["logs"])
+        if last_log is None:
+            return "I have had no report on" + stalked["username"] + "since my last restart."
+        current_time = _time.time()
+        uptime_string = utils.format_period(current_time - last_log["timestamp"])
+        status_string = "online" if last_log["isOnline"] else "offline"
+        return "They have been " + status_string + " for: " + uptime_string
 
     async def on_self_context(self, uuid, name, is_guest, is_online, is_deleted):
         print("[debug]", "on_self_context")
+
+        for data in self.storage["friends"]:
+            uuid, name, is_guest, is_online, is_deleted = utils.extract_user(data)
+            self.add_stalked(uuid, name, is_guest, is_online, is_deleted)
+
+    async def on_friend_add(self, uuid, name, is_guest, is_online, is_deleted):
+        print("[debug]", "on_friend_add")
+        print(uuid, name, is_guest, is_online, is_deleted)
+
+        self.add_stalked(uuid, name, is_guest, is_online, is_deleted)
+
+    async def on_friend_remove(self, uuid):
+        print("[debug]", "on_friend_remove")
+        print(uuid)
+
+        self.remove_stalked(uuid)
+
+    async def on_friend_update(self, uuid, name, is_guest, is_online, is_deleted):
+        print("[debug]", "on_friend_update")
+        print(uuid, name, is_guest, is_online, is_deleted)
+
+        self.update_stalked(uuid, name, is_guest, is_online, is_deleted)
 
     async def on_text_add(self, uuid, name, body, time, is_mine):
         print("[debug]", "on_text_add")
         print(uuid, name, body, time, is_mine)
 
         if is_mine:
-            return
-        if uuid in self.muted_uuids:
+            pass
+        elif uuid in self.muted_uuids:
             await self.remove_text(uuid)
 
     async def on_pv_add(self, uuid, body, time, is_mine):
+        body = body.replace(constants.PROFILE_URL, "")
+        body = body.replace(constants.PROFILE_PATH, "")
         if is_mine:
             pass
         elif utils.startswith(body, "ban"):
@@ -155,22 +203,45 @@ class Master(base.Root):
         args = utils.strip(body, "stalk")
 
         if len(args) <= 0:
-            await self.add_pv(uuid, "This is a tricky feature I hesitate to equip myself with.")
-            await self.add_pv(uuid, "It involves colleting information on a user's activity, like their login pattern and whatnots.")
-            await self.add_pv(uuid, "If you like this feature to be enabled, let me know.")
+            await self.add_pv(uuid, "This will basically make me keep records of someone's login pattern.")
+            await self.add_pv(uuid, "I need their nickname or their UUID, if you don't know what that is type \"UUID\" for info.")
             return
 
-        await self.add_pv(uuid, "Dunno what to do with that, I think they patched it for decorations!")
+        if utils.isuuid(args):
+            self.add_friend(args)
+            await self.add_pv(uuid, "I will be stalking them from now on.")
+            return
+
+        users = self.storage["chatroomContext"]["data"]["users"].values()
+        user = utils.best_match(users, "username", args)
+        if user is not None:
+            self.add_friend(user["userUuid"])
+            await self.add_pv(uuid, "I found a match and added this fellow to my stalking list: " + user["username"])
+            return
+
+        await self.add_pv(uuid, "Due to an unknown reason I couldn't do it, You'd best try when they are in our room.")
 
     async def unstalk(self, uuid, body):
         args = utils.strip(body, "unstalk")
 
         if len(args) <= 0:
             await self.add_pv(uuid, "Well, this stops me from stalking someone I was asked to stalk before.")
-            await self.add_pv(uuid, "It's disabled for now, just saying!")
+            await self.add_pv(uuid, "I need either a nickname or a UUID, in order to do that.")
             return
 
-        await self.add_pv(uuid, "Dunno what to do with that, I think they patched it for decorations!")
+        if utils.isuuid(args):
+            self.remove_friend(args)
+            await self.add_pv(uuid, "Good, I was getting tired of this stupid game of tag.")
+            return
+
+        users = self.stalked_users.values()
+        user = utils.best_match(users, "username", args)
+        if user is not None:
+            await self.remove_friend(user["userUuid"])
+            await self.add_pv(uuid, "Good, I was getting tired of this stupid game of tag with this fellow: " + user["username"])
+            return
+
+        await self.add_pv(uuid, "I don't think I have been stalking this person.")
 
     async def shield(self, uuid, body):
         args = utils.strip(body, "shield")
