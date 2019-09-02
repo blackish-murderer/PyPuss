@@ -64,10 +64,16 @@ class Master(base.Root):
         print("[debug]", "on_text_add")
         print(uuid, name, body, time, is_mine)
 
+        body = body.replace(constants.PROFILE_URL, "")
+        body = body.replace(constants.PROFILE_PATH, "")
+
         if is_mine:
             pass
         elif uuid in self.muted_uuids:
             await self.remove_text(uuid)
+        elif utils.isuuid(body):
+            await self.remove_text(uuid)
+            await self.remove_text(body)
 
     async def on_pv_add(self, uuid, body, time, is_mine):
         body = body.replace(constants.PROFILE_URL, "")
@@ -193,7 +199,7 @@ class Master(base.Root):
 
         if utils.isuuid(args):
             self.muted_uuids.remove(args)
-            await self.add_pv(uuid, "Not sure if it was the correct decision.")
+            await self.add_pv(uuid, "I think they are dead by now.")
             return
 
         users = await self.batch_context_users(self.muted_uuids)
@@ -372,6 +378,7 @@ class Master(base.Root):
 
         await self.add_pv(uuid, "Speaking of UUIDs, they are unique IDs for each user.")
         await self.add_pv(uuid, "If you are asked for someone's UUID, just drag and drop their avatar in the textbox below.")
+        await self.add_pv(uuid, "Posting the link in chatroom will wipe your texts in addition to the texts from the owner of the avatar you dropped.")
 
     async def freeall(self, uuid, body):
         args = utils.strip(body, "freeall")
