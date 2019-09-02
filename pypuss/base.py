@@ -316,8 +316,11 @@ class Root():
     async def remove_text(self, uuid):
         return await self.client.publish("/service/moderator/messages/remove", {"targetUserUuid": uuid})
 
-    async def context_user(self, uuid):
-        return await self.client.publish("/service/user/context/target", {"userUuid": uuid})
+    async def context_user(self, uuid, short=False):
+        uuid, name, signature, is_guest, is_online, is_deleted, is_bluehead = await self.client.publish("/service/user/context/target", {"userUuid": uuid})
+        if short:
+            return {"userUuid": uuid, "username": name}
+        return uuid, name, signature, is_guest, is_online, is_deleted, is_bluehead = 
 
     async def batch_context_users(self, uuids):
         users = []
