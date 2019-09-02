@@ -365,9 +365,9 @@ class Master(base.Root):
         await self.add_pv(uuid, "I feel so lively now.")
 
     async def uuid(self, uuid, body):
-        if utils.isuuid(args):
+        if utils.isuuid(body):
             await self.add_pv(uuid, "Yes! This is the UUID you need, down below!")
-            await self.add_pv(uuid, args)
+            await self.add_pv(uuid, body)
             return
 
         await self.add_pv(uuid, "Speaking of UUIDs, they are unique IDs for each user.")
