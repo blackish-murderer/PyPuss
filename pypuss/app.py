@@ -86,6 +86,8 @@ class Master(base.Root):
             await self.stalk(uuid, body)
         elif utils.startswith(body, "unstalk"):
             await self.unstalk(uuid, body)
+        elif utils.startswith(body, "report"):
+            await self.report(uuid, body)
         elif utils.startswith(body, "shield"):
             await self.shield(uuid, body)
         elif utils.startswith(body, "quote"):
@@ -100,10 +102,14 @@ class Master(base.Root):
             await self.uptime(uuid, body)
         elif utils.startswith(body, "refresh"):
             await self.refresh(uuid, body)
+        elif utils.startswith(body, "uuid"):
+            await self.uuid(uuid, body)
         elif utils.startswith(body, "freeall"):
             await self.freeall(uuid, body)
         elif utils.startswith(body, "help"):
             await self.help(uuid, body)
+        elif utils.isuuid(body):
+            await self.uuid(uuid, body)
         else:
             await self.nocommand(uuid, body)
 
@@ -225,7 +231,7 @@ class Master(base.Root):
         args = utils.strip(body, "unstalk")
 
         if len(args) <= 0:
-            await self.add_pv(uuid, "Well, this stops me from stalking someone I was asked to stalk before.")
+            await self.add_pv(uuid, "This stops me from stalking someone I was asked to stalk before.")
             await self.add_pv(uuid, "I need either a nickname or a UUID, in order to do that.")
             return
 
@@ -242,6 +248,16 @@ class Master(base.Root):
             return
 
         await self.add_pv(uuid, "I don't think I have been stalking this person.")
+
+    async def report(self, uuid, body):
+        args = utils.strip(body, "report")
+
+        if len(args) <= 0:
+            await self.add_pv(uuid, "This is the gist of all the stalking I do.")
+            await self.add_pv(uuid, "but I can not deliver the reports to you right now.")
+            return
+
+        await self.add_pv(uuid, "Be patient! There are a bunch of stuffs to sort out yet.")
 
     async def shield(self, uuid, body):
         args = utils.strip(body, "shield")
@@ -348,6 +364,15 @@ class Master(base.Root):
         await self.context_self()
         await self.add_pv(uuid, "I feel so lively now.")
 
+    async def uuid(self, uuid, body):
+        if utils.isuuid(args):
+            await self.add_pv(uuid, "Yes! This is the UUID you need, down below!")
+            await self.add_pv(uuid, args)
+            return
+
+        await self.add_pv(uuid, "Speaking of UUIDs, they are unique IDs for each user.")
+        await self.add_pv(uuid, "If you are asked for someone's UUID, just drag and drop their avatar in the textbox below.")
+
     async def freeall(self, uuid, body):
         args = utils.strip(body, "freeall")
 
@@ -363,11 +388,11 @@ class Master(base.Root):
 
     async def help(self, uuid, body):
         await self.add_pv(uuid, "Here is the list of commands you may use to interact with me.")
-        await self.add_pv(uuid, "Ban, Unban, Mute, Unmute, Stalk, Unstalk, Shield, Quote, Clear, Remove, Notrace, Uptime, Refresh")
+        await self.add_pv(uuid, "Ban, Unban, Mute, Unmute, Stalk, Unstalk, Report, Shield, Quote, Clear, Remove, Notrace, Uptime, Refresh, UUID")
         await self.add_pv(uuid, "Just try them out, I'll help you with their usage, bear in mind case don't matter.")
 
     async def nocommand(self, uuid, body):
-        commands = ["ban", "unban", "mute", "unmute", "stalk", "unstalk", "shield", "quote", "clear", "remove", "notrace", "uptime", "refresh"]
+        commands = ["ban", "unban", "mute", "unmute", "stalk", "unstalk", "report", "shield", "quote", "clear", "remove", "notrace", "uptime", "refresh", "uuid"]
 
         words = body.split()
         if len(words) > 0:
