@@ -208,14 +208,14 @@ class Master(base.Root):
             return
 
         if utils.isuuid(args):
-            self.add_friend(args)
+            await self.add_friend(args)
             await self.add_pv(uuid, "I will be stalking them from now on.")
             return
 
         users = self.storage["chatroomContext"]["data"]["users"].values()
         user = utils.best_match(users, "username", args)
         if user is not None:
-            self.add_friend(user["userUuid"])
+            await self.add_friend(user["userUuid"])
             await self.add_pv(uuid, "I found a match and added this fellow to my stalking list: " + user["username"])
             return
 
@@ -230,7 +230,7 @@ class Master(base.Root):
             return
 
         if utils.isuuid(args):
-            self.remove_friend(args)
+            await self.remove_friend(args)
             await self.add_pv(uuid, "Good, I was getting tired of this stupid game of tag.")
             return
 
