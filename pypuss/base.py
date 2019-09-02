@@ -320,7 +320,7 @@ class Root():
         uuid, name, signature, is_guest, is_online, is_deleted, is_bluehead = await self.client.publish("/service/user/context/target", {"userUuid": uuid})
         if short:
             return {"userUuid": uuid, "username": name}
-        return uuid, name, signature, is_guest, is_online, is_deleted, is_bluehead = 
+        return uuid, name, signature, is_guest, is_online, is_deleted, is_bluehead
 
     async def batch_context_users(self, uuids):
         users = []
