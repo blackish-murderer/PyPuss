@@ -300,7 +300,7 @@ class Root():
     async def add_friend(self, uuid):
         return await self.client.publish("/service/friends/add", {"userUuid": uuid})
 
-    async def remove_firend(self, uuid):
+    async def remove_friend(self, uuid):
         return await self.client.publish("/service/friends/remove", {"userUuid": uuid})
 
     async def add_ban(self, uuid):
