@@ -372,7 +372,7 @@ class Master(base.Root):
 
     async def uuid(self, uuid, body):
         if utils.isuuid(body):
-            await self.add_pv(uuid, "Yes! This is the UUID you need, down below!")
+            await self.add_pv(uuid, "Yes! Here is the UUID of the user you asked for!")
             await self.add_pv(uuid, body)
             return
 
