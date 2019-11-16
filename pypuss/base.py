@@ -304,17 +304,17 @@ class Root():
         return await self.client.publish("/service/friends/remove", {"userUuid": uuid})
 
     async def add_ban(self, uuid):
-        return await self.client.publish("/service/moderator/ban/add", {"targetUserUuid": uuid})
+        return await self.client.publish("/service/moderator/ban-account", {"accountId": uuid})
 
     async def remove_ban(self, uuid):
-        return await self.client.publish("/service/moderator/ban/remove", {"targetUserUuid": uuid})
+        return await self.client.publish("/service/moderator/unban-account", {"accountId": uuid})
 
     async def add_text(self, text):
         self.last_pb = await utils.wait_threshold(self.last_pb)
         return await self.client.publish("/service/chatroom/message", {"messageBody": text})
 
     async def remove_text(self, uuid):
-        return await self.client.publish("/service/moderator/messages/remove", {"targetUserUuid": uuid})
+        return await self.client.publish("/service/moderator/messages/remove-messages", {"accountId": uuid})
 
     async def context_user(self, uuid, short=False):
         uuid, name, signature, is_guest, is_online, is_deleted, is_bluehead = await self.client.publish("/service/user/context/target", {"userUuid": uuid})
