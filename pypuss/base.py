@@ -243,7 +243,7 @@ class Root():
     async def _on_notice_add(self, data, skip):
         uuid, name, is_guest, is_online, is_deleted = utils.extract_user(data)
         if skip:
-            return uuid, name, is_guest, is_online, is_deleted    
+            return uuid, name, is_guest, is_online, is_deleted
         utils.append_to(self.storage["conversationNotifications"], data)
         return await self.on_notice_add(uuid, name, is_guest, is_online, is_deleted)
 
@@ -276,7 +276,7 @@ class Root():
         pass
 
     async def context_self(self):
-        return await self.client.publish("/service/user/context/self/complete", {})
+        return await self.client.publish("/service/account/get-self", {})
 
     async def add_pv(self, uuid, text):
         self.last_pv = await utils.wait_threshold(self.last_pv)
