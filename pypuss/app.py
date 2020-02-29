@@ -51,7 +51,7 @@ class Master(base.Root):
         uuid = user.get("uuid")
         name = user.get("name")
 
-        print("[debug]", "on_chatroom_user_left")
+        print("[info]", "on_chatroom_user_left")
         print("[info]", uuid, name)
 
     async def on_conversation_message(self, message):
@@ -309,7 +309,6 @@ class Master(base.Root):
         for _uuid in uuids:
             await self.moderator_unban_account(_uuid)
 
-        print(self.banned)
         await self.conversation_message(uuid, "I freed them all!")
 
     async def help(self, uuid, text):
