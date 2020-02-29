@@ -7,6 +7,9 @@ async def main():
     await my_app.run()
 
 if __name__ == '__main__':
-    print("[debug]", "pypuss started running")
+    print("[info]", "started running")
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    try:
+        loop.run_until_complete(main())
+    except BaseException:
+        print("[info]", "shutting down")
