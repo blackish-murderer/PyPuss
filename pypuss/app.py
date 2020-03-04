@@ -9,10 +9,8 @@ class Master(base.Root):
     def __init__(self):
         base.Root.__init__(self)
         self.start_time = _time.time()
-        self.muted = {}
-        self.stalked_users = {}
         self.should_block_blues = False
-
+        self.muted = {}
 
     async def on_account_get_self(self, context):
         print("[info]" , "on_account_get_self")
@@ -201,13 +199,19 @@ class Master(base.Root):
             return
 
         if utils.ismatch(args, "on"):
-            self.should_block_blues = True
-            await self.conversation_message(uuid, "I'll fend them off as long as I live")
+            if self.should_block_blues:
+                await self.conversation_message(uuid, "I'm already squeezing the hell out of them.")
+            else:
+                self.should_block_blues = True
+                await self.conversation_message(uuid, "I'll fend them off as long as I live.")
             return
 
         if utils.ismatch(args, "off"):
-            self.should_block_blues = False
-            await self.conversation_message(uuid, "I could keep them away for years")
+            if not self.should_block_blues:
+                await self.conversation_message(uuid, "I was letting them in anyway.")
+            else:
+                self.should_block_blues = False
+                await self.conversation_message(uuid, "I could keep them away for years.")
             return
 
         await self.conversation_message(uuid, "What with my shield? Put it \"on\" or \"off\"?")
@@ -302,7 +306,7 @@ class Master(base.Root):
         args = utils.strip(text, "freeall")
 
         if len(args) > 0:
-            await self.conversation_message(uuid, "This will unban everyone in my list")
+            await self.conversation_message(uuid, "This will unban everyone in my list.")
             return
 
         uuids = self.banned.keys()
@@ -314,7 +318,7 @@ class Master(base.Root):
     async def help(self, uuid, text):
         await self.conversation_message(uuid, "Here is the list of commands you may use to interact with me.")
         await self.conversation_message(uuid, "Ban, Unban, Mute, Unmute, Shield, Quote, Clear, Remove, Uptime, Refresh, UUID")
-        await self.conversation_message(uuid, "Just try them out, I'll help you with their usage, bear in mind case don't matter.")
+        await self.conversation_message(uuid, "Just try them out, I'll help you with their usage, bear in mind case doesn't matter.")
 
     async def nocommand(self, uuid, text):
         commands = [{"name": "ban"}, {"name": "unban"}, {"name": "mute"}, {"name": "unmute"}, {"name": "shield"}, {"name": "quote"}, {"name": "clear"}, {"name": "remove"}, {"name": "uptime"}, {"name": "refresh"}, {"name": "uuid"}]
